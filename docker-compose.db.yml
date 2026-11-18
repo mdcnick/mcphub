@@ -1,18 +1,12 @@
-version: "3.8"
-
 services:
-  # PostgreSQL database for MCPHub configuration
   postgres:
     image: pgvector/pgvector:pg17
-    container_name: mcphub-postgres
     environment:
       POSTGRES_DB: mcphub
       POSTGRES_USER: mcphub
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-mcphub_password}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in Coolify}
     volumes:
       - pgdata:/var/lib/postgresql/data
-    ports:
-      - "${DB_PORT:-5432}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U mcphub"]
       interval: 10s
@@ -21,35 +15,17 @@ services:
     networks:
       - mcphub-network
 
-  # MCPHub application
   mcphub:
     image: samanhappy/mcphub:latest
-    container_name: mcphub
     environment:
-      # Database connection (setting DB_URL automatically enables database mode)
-      DB_URL: "postgresql://mcphub:${DB_PASSWORD:-mcphub_password}@postgres:5432/mcphub"
-
-      # Optional: Explicitly control database mode (overrides auto-detection)
-      # USE_DB: "true"
-
-      # Application settings
+      DB_URL: "postgresql://mcphub:${DB_PASSWORD:?Set DB_PASSWORD in Coolify}@postgres:5432/mcphub"
       PORT: 3000
       NODE_ENV: production
-
-      # Optional: Custom npm registry
-      # NPM_REGISTRY: https://registry.npmjs.org/
-
-      # Optional: Proxy settings
-      # HTTP_PROXY: http://proxy:8080
-      # HTTPS_PROXY: http://proxy:8080
     ports:
-      - "${MCPHUB_PORT:-3000}:3000"
+      - "127.0.0.1:18473:3000"
     depends_on:
       postgres:
         condition: service_healthy
-    # Staged content and the file-mode ledger live under /app/data. In database
-    # mode the ledger is in Postgres but the content is still local, so the
-    # volume is required for a staged file to survive a container restart.
     volumes:
       - mcphub-data:/app/data
     restart: unless-stopped
