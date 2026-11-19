@@ -5,5 +5,6 @@ ADD https://github.com/tianon/gosu.git#29b939aa5bd4dc588af765b8248f6e39150d2565 
 RUN CGO_ENABLED=0 go build -trimpath -mod=readonly -o /out/gosu . && go version -m /out/gosu
 
 FROM pgvector/pgvector:0.8.7-pg17-bookworm@sha256:0a547a6067fdea4eec4cfb0887c4ddae2e91b1932cecc071541c14ee318312ce
+ENV GOSU_VERSION=1.20
 COPY --from=builder /out/gosu /usr/local/bin/gosu
 RUN gosu nobody true
