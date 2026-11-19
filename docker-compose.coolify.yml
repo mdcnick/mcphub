@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: ghcr.io/mdcnick/mcphub-pgvector@sha256:c3b6854b1d3582f7bf113c4bfbe34835c9fb52460fc3e8337ac34117e4d70a85
+    environment:
+      POSTGRES_DB: mcphub
+      POSTGRES_USER: mcphub
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in Coolify}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mcphub"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mcphub-network
+
+  mcphub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_URL: "postgresql://mcphub:${DB_PASSWORD:?Set DB_PASSWORD in Coolify}@postgres:5432/mcphub"
+      PORT: 3000
+      NODE_ENV: production
+    ports:
+      - "127.0.0.1:18473:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - mcphub-data:/app/data
+    restart: unless-stopped
+    networks:
+      - mcphub-network
+
+volumes:
+  pgdata:
+  mcphub-data:
+    driver: local
+
+networks:
+  mcphub-network:
+    driver: bridge
