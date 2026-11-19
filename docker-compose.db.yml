@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: pgvector/pgvector:pg17
+    image: ghcr.io/mdcnick/mcphub-pgvector@sha256:c3b6854b1d3582f7bf113c4bfbe34835c9fb52460fc3e8337ac34117e4d70a85
     environment:
       POSTGRES_DB: mcphub
       POSTGRES_USER: mcphub
