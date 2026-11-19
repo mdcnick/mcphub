@@ -16,7 +16,9 @@ services:
       - mcphub-network
 
   mcphub:
-    image: samanhappy/mcphub:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       DB_URL: "postgresql://mcphub:${DB_PASSWORD:?Set DB_PASSWORD in Coolify}@postgres:5432/mcphub"
       PORT: 3000
